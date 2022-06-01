@@ -62,11 +62,14 @@ def main(args):
                 next_obs = game.get_observation(args.player_idx)
                 done = False if game.state["end_game"] == False else True
                 if action.action_type == "replace" or action.action_type == "discard":
-                    reward = get_reward(obs, action, next_obs)
-                    action_dist = greedy_ddpg.history[-1]["action_dist"]
-                    greedy_ddpg.replay_buffer_push(
-                        obs, action_dist, reward, next_obs, done)
-                    greedy_ddpg.update()
+                    try:
+                        reward = get_reward(obs, action, next_obs)
+                        action_dist = greedy_ddpg.history[-1]["action_dist"]
+                        greedy_ddpg.replay_buffer_push(
+                            obs, action_dist, reward, next_obs, done)
+                        greedy_ddpg.update()
+                    except KeyError:
+                        pass
                 step += 1
                 if args.episode_length <= step or done:
                     if episode % args.save_interval == 0:

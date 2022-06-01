@@ -22,7 +22,7 @@ class Greedy_DDPG(Agent):
                 self.history.append({"obs": obs, "action": action})
                 print(f"{self.name} chooses {action.action_type}")
                 return action
-        if obs["player_state"] == "passive" or obs["reach"][self.args.player_id]:
+        if obs["player_state"] == "passive" or obs["reach"][self.args.player_idx]:
             self.history.append({"obs": obs, "action": action})
             return action_space[0]
         else:
