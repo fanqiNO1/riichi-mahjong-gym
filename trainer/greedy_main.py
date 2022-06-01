@@ -75,6 +75,11 @@ def main(args):
                     if episode % args.save_interval == 0:
                         greedy_ddpg.save(f"{args.name}_{episode}")
                         print(f"Saved model at episode {episode}")
+                        with open("loss.txt", "a") as f:
+                            for i in range(len(greedy_ddpg.a_loss)):
+                                f.write(f"a_loss: {greedy_ddpg.a_loss[i]}, c_loss: {greedy_ddpg.c_loss[i]}\n")
+                        greedy_ddpg.a_loss = []
+                        greedy_ddpg.c_loss = []
                     break
             else:
                 try:

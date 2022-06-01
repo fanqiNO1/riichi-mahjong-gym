@@ -16,3 +16,4 @@ logs/*
 
 # Game testing temp files
 mahjong.hand.txt
+trainer/run.log
