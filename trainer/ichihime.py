@@ -1,5 +1,5 @@
 from env.agent import Agent
-from trainer.models.strategy import Chii, Pon, Agari, Replace
+from trainer.models.strategy import Chii, Pon, Reach, Agari, Replace
 from trainer.utils import encode
 
 class Ichihime(Agent):
@@ -9,6 +9,7 @@ class Ichihime(Agent):
         self.history = []
         self.chii = Chii(args)
         self.pon = Pon(args)
+        self.reach  = Reach(args)
         self.agari = Agari(args)
         self.replace = Replace(args)
 
@@ -20,6 +21,11 @@ class Ichihime(Agent):
             if action.action_type == "ron" or action.action_type == "tsumo":
                 is_agari, action_dist = self.agari.choose_action(obs)
                 if is_agari:
+                    action_chosen = action
+                    break
+            elif action.action_type == "reach":
+                is_reach, action_dist = self.reach.choose_action(obs)
+                if is_reach:
                     action_chosen = action
                     break
             elif action.action_type == "chi":
@@ -48,12 +54,14 @@ class Ichihime(Agent):
     def update(self):
         self.chii.update()
         self.pon.update()
+        self.reach.update()
         self.agari.update()
         self.replace.update()
 
     def save(self, name):
         self.chii.save(f"{name}_chii")
         self.pon.save(f"{name}_pon")
+        self.reach.save(f"{name}_reach")
         self.agari.save(f"{name}_agari")
         self.replace.save(f"{name}_replace")
 
@@ -70,8 +78,19 @@ class Ichihime(Agent):
             obs, action_dist, reward, next_obs, done = encode(
                     obs, action_dist, reward, next_obs, done)
             self.agari.replay_buffer.push(obs, action_dist, reward, next_obs, done)
+        elif action.action_type == "reach":
+            obs, action_dist, reward, next_obs, done = encode(
+                    obs, action_dist, reward, next_obs, done)
+            self.reach.replay_buffer.push(obs, action_dist, reward, next_obs, done)
         else:
             obs, action_dist, reward, next_obs, done = encode(
                     obs, action_dist, reward, next_obs, done)
             self.replace.replay_buffer.push(
                 obs, action_dist, reward, next_obs, done)
+
+    def load(self, name):
+        self.chii.load(f"{name}_chii")
+        self.pon.load(f"{name}_pon")
+        self.reach.load(f"{name}_reach")
+        self.agari.load(f"{name}_agari")
+        self.replace.load(f"{name}_replace")

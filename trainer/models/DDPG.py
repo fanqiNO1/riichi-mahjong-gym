@@ -140,6 +140,16 @@ class DDPG:
                         return action_space.index(i), action_origin
                 action = np.delete(action, action_temp)
 
+    def get_logits(self, obs):
+        obs = encode_obs(obs)
+        p = np.random.random()
+        if p > self.eps:
+            obs = torch.tensor([obs])
+            action = self.actor(obs).detach().numpy()[0]
+        else:
+            action = np.random.uniform(-1, 1, self.action_dim)
+        return action
+
     def update(self):
         if len(self.replay_buffer) < self.batch_size:
             return None, None
@@ -190,3 +200,8 @@ class DDPG:
     def save(self, name):
         torch.save(self.actor.state_dict(), name + "_actor.pth")
         torch.save(self.critic.state_dict(), name + "_critic.pth")
+
+
+    def load(self, name):
+        self.actor.load_state_dict(torch.load(name + "_actor.pth"))
+        self.critic.load_state_dict(torch.load(name + "_critic.pth"))

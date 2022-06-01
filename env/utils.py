@@ -15,7 +15,7 @@ __shanten = Shanten()
 __hand_calculator = HandCalculator()
 __tiles_converter = TilesConverter()
 
-def get_value(deck, incoming_tile, melds: list = [], game_state = None, ruleset = None, deduce: bool = False, dora_indicators: list = [], **kwargs) -> int:
+def get_value(deck, incoming_tile, melds: list = [], game_state = None, ruleset = None, deduce: bool = True, dora_indicators: list = [], **kwargs) -> int:
     '''
     Function: get_value(deck: `list`) -> `int`
 
@@ -165,7 +165,7 @@ def get_value(deck, incoming_tile, melds: list = [], game_state = None, ruleset 
         # Deduce the results from the game_state and ruleset
         from env.mahjong import MahjongGame
         from env.ruleset import Ruleset
-        assert isinstance(game_state, MahjongGame)
+        # assert isinstance(game_state, MahjongGame)
         assert isinstance(ruleset, Ruleset)
         # All the current options in ruleset does not affect options
         options = OptionalRules (
@@ -197,7 +197,8 @@ def get_value(deck, incoming_tile, melds: list = [], game_state = None, ruleset 
         # is_daburu_riichi
         is_daburu_riichi = game_state["double_reach"][game_state["ron_or_tsumo_player_idx"]]
         # is_nagashi_mangan
-        is_nagashi_mangan = game_state["is_nagashi_mangan"]
+        # is_nagashi_mangan = game_state["is_nagashi_mangan"]
+        is_nagashi_mangan = False
         # is_tenhou
         is_tenhou = (
             game_state["wind_e"] == game_state["ron_or_tsumo_player_idx"] and \

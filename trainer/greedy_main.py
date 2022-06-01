@@ -10,7 +10,7 @@ from env.agent import AgentAgari
 from env.mahjong import MahjongGame, MahjongEndGame
 from env.player import Player
 from env.ruleset import Ruleset
-from trainer.ichihime import Ichihime
+from trainer.greedy_DDPG import Greedy_DDPG
 from trainer.greedy import Greedy
 from trainer.utils import get_reward, encode
 
@@ -18,7 +18,7 @@ from trainer.utils import get_reward, encode
 
 def main(args):
     episode = 0
-    ichihime = Ichihime(args.name, args)
+    greedy_ddpg = Greedy_DDPG(args.name, args)
     while episode < args.max_episodes:
         episode += 1
         print("Episode:", episode)
@@ -26,7 +26,7 @@ def main(args):
         game = MahjongGame(ruleset=Ruleset("../rules/ruleset.json"))
         for i in range(4):
             if i == args.player_idx:
-                player = Player(args.name, is_manual=False, agent=ichihime)
+                player = Player(args.name, is_manual=False, agent=greedy_ddpg)
             else:
                 agent = Greedy(f"Player{i}")
                 player = Player(f"Player{i}", is_manual=False, agent=agent)
@@ -39,34 +39,38 @@ def main(args):
                 except MahjongEndGame:
                     done = True
                     if episode % args.save_interval == 0:
-                        ichihime.save(f"{args.name}_{episode}")
+                        greedy_ddpg.save(f"{args.name}_{episode}")
                         print(f"Saved model at episode {episode}")
+                        with open("loss.txt", "a") as f:
+                            for i in range(len(greedy_ddpg.a_loss)):
+                                f.write(f"a_loss: {greedy_ddpg.a_loss[i]}, c_loss: {greedy_ddpg.c_loss[i]}\n")
+                        greedy_ddpg.a_loss = []
+                        greedy_ddpg.c_loss = []
                     break
                 except TypeError:
                     done = True
                     if episode % args.save_interval == 0:
-                        ichihime.save(f"{args.name}_{episode}")
+                        greedy_ddpg.save(f"{args.name}_{episode}")
                         print(f"Saved model at episode {episode}")
+                        with open("loss.txt", "a") as f:
+                            for i in range(len(greedy_ddpg.a_loss)):
+                                f.write(f"a_loss: {greedy_ddpg.a_loss[i]}, c_loss: {greedy_ddpg.c_loss[i]}\n")
+                        greedy_ddpg.a_loss = []
+                        greedy_ddpg.c_loss = []
                     break
-                obs, action, action_dist = ichihime.history[-1]["obs"], ichihime.history[-1]["action"], ichihime.history[-1]["action_dist"]
+                obs, action = greedy_ddpg.history[-1]["obs"], greedy_ddpg.history[-1]["action"]
                 next_obs = game.get_observation(args.player_idx)
                 done = False if game.state["end_game"] == False else True
-                reward = get_reward(obs, action, next_obs)
-                if len(ichihime.history) >= 2 and (ichihime.history[-2]["action"].action_type == "chii" or ichihime.history[-2]["action"].action_type == "pon"):
-                    last_obs, last_action, last_action_dist = ichihime.history[-2]["obs"], ichihime.history[-2]["action"], ichihime.history[-2]["action_dist"]
-                    last_next_obs = obs
-                    last_done = False
-                    last_reward = get_reward(
-                        last_obs, last_action, last_next_obs)
-                    ichihime.replay_buffer_push(
-                        last_obs, last_action, last_action_dist, last_reward, last_next_obs, last_done)
-                ichihime.replay_buffer_push(
-                    obs, action, action_dist, reward, next_obs, done)
-                ichihime.update()
+                if action.action_type == "replace" or action.action_type == "discard":
+                    reward = get_reward(obs, action, next_obs)
+                    action_dist = greedy_ddpg.history[-1]["action_dist"]
+                    greedy_ddpg.replay_buffer_push(
+                        obs, action_dist, reward, next_obs, done)
+                    greedy_ddpg.update()
                 step += 1
                 if args.episode_length <= step or done:
                     if episode % args.save_interval == 0:
-                        ichihime.save(f"{args.name}_{episode}")
+                        greedy_ddpg.save(f"{args.name}_{episode}")
                         print(f"Saved model at episode {episode}")
                     break
             else:
@@ -75,20 +79,30 @@ def main(args):
                 except MahjongEndGame:
                     done = True
                     if episode % args.save_interval == 0:
-                        ichihime.save(f"{args.name}_{episode}")
+                        greedy_ddpg.save(f"{args.name}_{episode}")
                         print(f"Saved model at episode {episode}")
+                        with open("loss.txt", "a") as f:
+                            for i in range(len(greedy_ddpg.a_loss)):
+                                f.write(f"a_loss: {greedy_ddpg.a_loss[i]}, c_loss: {greedy_ddpg.c_loss[i]}\n")
+                        greedy_ddpg.a_loss = []
+                        greedy_ddpg.c_loss = []
                     break
                 except TypeError:
                     done = True
                     if episode % args.save_interval == 0:
-                        ichihime.save(f"{args.name}_{episode}")
+                        greedy_ddpg.save(f"{args.name}_{episode}")
                         print(f"Saved model at episode {episode}")
+                        with open("loss.txt", "a") as f:
+                            for i in range(len(greedy_ddpg.a_loss)):
+                                f.write(f"a_loss: {greedy_ddpg.a_loss[i]}, c_loss: {greedy_ddpg.c_loss[i]}\n")
+                        greedy_ddpg.a_loss = []
+                        greedy_ddpg.c_loss = []
                     break
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--name', type=str, default='ichihime')
+    parser.add_argument('--name', type=str, default='greedy_DDPG')
     parser.add_argument('--max_episodes', default=50000, type=int)
     parser.add_argument('--episode_length', default=200, type=int)
     parser.add_argument('--save_interval', default=10000, type=int)
