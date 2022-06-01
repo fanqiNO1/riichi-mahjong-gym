@@ -10,6 +10,7 @@ import numpy as np
 class Greedy_DDPG(Agent):
     def __init__(self, name, args):
         super().__init__(name)
+        self.args = args
         self.replace = Replace(args)
         self.history = []
         self.a_loss = []
@@ -21,7 +22,7 @@ class Greedy_DDPG(Agent):
                 self.history.append({"obs": obs, "action": action})
                 print(f"{self.name} chooses {action.action_type}")
                 return action
-        if obs["player_state"] == "passive":
+        if obs["player_state"] == "passive" or obs["reach"][self.args.player_id]:
             self.history.append({"obs": obs, "action": action})
             return action_space[0]
         else:
