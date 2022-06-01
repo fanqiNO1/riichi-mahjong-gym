@@ -40,4 +40,4 @@ class AgentAgari(Agent):
         for action in action_space:
             if action.action_type == "ron" or action.action_type == "tsumo":
                 return action
-        return random.choice(action_space)
+        return random.choice([action for action in action_space if not "kan" in action.action_type])

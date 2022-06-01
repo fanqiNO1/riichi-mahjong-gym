@@ -395,7 +395,7 @@ class MahjongGame():
         # Get player
         player = self.players[player]
         # Perform action
-        print(action)
+        # print(action)
         if action.action_type == "kan":
             # 加槓
             player_idx = obs["player_idx"]
