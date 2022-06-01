@@ -83,3 +83,8 @@ def get_reward_replace(obs, action, next_obs):
     next_shanten = shanten_count(Deck(next_obs["hand"]))
     reward = current_shanten - next_shanten
     return reward
+
+def get_reward_greedy(obs, action, next_obs):
+    reward = get_reward_replace(obs, action, next_obs)
+    reward += get_reward_agari(obs, action, next_obs)
+    return reward

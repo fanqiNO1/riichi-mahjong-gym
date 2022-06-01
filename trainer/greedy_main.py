@@ -12,7 +12,7 @@ from env.player import Player
 from env.ruleset import Ruleset
 from trainer.greedy_DDPG import Greedy_DDPG
 from trainer.greedy import Greedy
-from trainer.utils import get_reward, encode
+from trainer.utils import get_reward_greedy
 
 
 
@@ -41,45 +41,27 @@ def main(args):
                     if episode % args.save_interval == 0:
                         greedy_ddpg.save(f"{args.name}_{episode}")
                         print(f"Saved model at episode {episode}")
-                        with open("loss.txt", "a") as f:
-                            for i in range(len(greedy_ddpg.a_loss)):
-                                f.write(f"a_loss: {greedy_ddpg.a_loss[i]}, c_loss: {greedy_ddpg.c_loss[i]}\n")
-                        greedy_ddpg.a_loss = []
-                        greedy_ddpg.c_loss = []
-                    break
+                        greedy_ddpg.write_loss()
                 except TypeError:
                     done = True
                     if episode % args.save_interval == 0:
                         greedy_ddpg.save(f"{args.name}_{episode}")
                         print(f"Saved model at episode {episode}")
-                        with open("loss.txt", "a") as f:
-                            for i in range(len(greedy_ddpg.a_loss)):
-                                f.write(f"a_loss: {greedy_ddpg.a_loss[i]}, c_loss: {greedy_ddpg.c_loss[i]}\n")
-                        greedy_ddpg.a_loss = []
-                        greedy_ddpg.c_loss = []
-                    break
+                        greedy_ddpg.write_loss()
                 obs, action = greedy_ddpg.history[-1]["obs"], greedy_ddpg.history[-1]["action"]
                 next_obs = game.get_observation(args.player_idx)
                 done = False if game.state["end_game"] == False else True
-                if action.action_type == "replace" or action.action_type == "discard":
-                    try:
-                        reward = get_reward(obs, action, next_obs)
-                        action_dist = greedy_ddpg.history[-1]["action_dist"]
-                        greedy_ddpg.replay_buffer_push(
-                            obs, action_dist, reward, next_obs, done)
-                        greedy_ddpg.update()
-                    except KeyError:
-                        pass
+                reward = get_reward_greedy(obs, action, next_obs)
+                action_dist = greedy_ddpg.history[-1]["action_dist"]
+                greedy_ddpg.replay_buffer_push(
+                    obs, action_dist, reward, next_obs, done)
+                greedy_ddpg.update()
                 step += 1
                 if args.episode_length <= step or done:
                     if episode % args.save_interval == 0:
                         greedy_ddpg.save(f"{args.name}_{episode}")
                         print(f"Saved model at episode {episode}")
-                        with open("loss.txt", "a") as f:
-                            for i in range(len(greedy_ddpg.a_loss)):
-                                f.write(f"a_loss: {greedy_ddpg.a_loss[i]}, c_loss: {greedy_ddpg.c_loss[i]}\n")
-                        greedy_ddpg.a_loss = []
-                        greedy_ddpg.c_loss = []
+                        greedy_ddpg.write_loss()
                     break
             else:
                 try:
@@ -89,23 +71,15 @@ def main(args):
                     if episode % args.save_interval == 0:
                         greedy_ddpg.save(f"{args.name}_{episode}")
                         print(f"Saved model at episode {episode}")
-                        with open("loss.txt", "a") as f:
-                            for i in range(len(greedy_ddpg.a_loss)):
-                                f.write(f"a_loss: {greedy_ddpg.a_loss[i]}, c_loss: {greedy_ddpg.c_loss[i]}\n")
-                        greedy_ddpg.a_loss = []
-                        greedy_ddpg.c_loss = []
-                    break
+                        greedy_ddpg.write_loss()
+                    game.state["player_idx"] = args.player_idx
                 except TypeError:
                     done = True
                     if episode % args.save_interval == 0:
                         greedy_ddpg.save(f"{args.name}_{episode}")
                         print(f"Saved model at episode {episode}")
-                        with open("loss.txt", "a") as f:
-                            for i in range(len(greedy_ddpg.a_loss)):
-                                f.write(f"a_loss: {greedy_ddpg.a_loss[i]}, c_loss: {greedy_ddpg.c_loss[i]}\n")
-                        greedy_ddpg.a_loss = []
-                        greedy_ddpg.c_loss = []
-                    break
+                        greedy_ddpg.write_loss()
+                    game.state["player_idx"] = args.player_idx
 
 
 if __name__ == '__main__':

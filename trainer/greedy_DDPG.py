@@ -6,6 +6,7 @@ from env.tiles import Tile
 from trainer.models.strategy import Replace
 
 import numpy as np
+from copy import deepcopy
 
 class Greedy_DDPG(Agent):
     def __init__(self, name, args):
@@ -19,18 +20,15 @@ class Greedy_DDPG(Agent):
     def query(self, obs, action_space):
         for action in action_space:
             if action.action_type == "ron" or action.action_type == "tsumo":
-                self.history.append({"obs": obs, "action": action})
                 print(f"{self.name} chooses {action.action_type}")
                 return action
         if obs["player_state"] == "passive" or obs["reach"][self.args.player_idx]:
-            self.history.append({"obs": obs, "action": action})
             return action_space[0]
         else:
             # print(action_space)
             for action in action_space:
                 if action.action_type == "reach":
                     print(f"{self.name} chooses {action.action_type}")
-                    self.history.append({"obs": obs, "action": action})
                     return action
             logits = np.array(self.replace.get_logits(obs))
             hand = obs["hand"]
@@ -54,14 +52,14 @@ class Greedy_DDPG(Agent):
             logit = logits[tiles]
             action_idx = np.argmax(logit)
             action = actions[action_idx]
-            self.history.append({"obs": obs, "action": action, "action_dist": logits})
+            self.history.append({"obs": deepcopy(obs), "action": action, "action_dist": logits})
             return action
             # return action_space[idx]
 
     def update(self):
-        a_loss, c_loss = self.replace.update()
-        self.a_loss.append(a_loss)
-        self.c_loss.append(c_loss)
+        c_loss, a_loss = self.replace.update()
+        self.c_loss.append(a_loss)
+        self.a_loss.append(c_loss)
 
     def save(self, name):
         self.replace.save(name)
@@ -73,3 +71,11 @@ class Greedy_DDPG(Agent):
         obs, action_dist, reward, next_obs, done = encode(
             obs, action_dist, reward, next_obs, done)
         self.replace.replay_buffer.push(obs, action_dist, reward, next_obs, done)
+
+    def write_loss(self):
+        with open("loss.txt", "a") as f:
+            for i in range(len(self.a_loss)):
+                if self.a_loss[i] is not None:
+                    f.write(f"a_loss: {self.a_loss[i]}, c_loss: {self.c_loss[i]}\n")
+        self.a_loss = []
+        self.c_loss = []
