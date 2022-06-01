@@ -259,7 +259,7 @@ def can_pon(tile_list, incoming_tile, obs):
                     non_red_dora += 1
             if non_red_dora >= 2:
                 # No red dora OK
-                action_pon.append(Action.PON(create_pon_string(incoming_tile, identicals[0], identicals[0], rel)))
+                action_pon.append(Action.PON(create_pon_string(incoming_tile, identicals[0], identicals[1], rel)))
     else:
         if len(identicals) >= 2:
             action_pon.append(Action.PON(create_pon_string(incoming_tile, incoming_tile, incoming_tile, rel)))

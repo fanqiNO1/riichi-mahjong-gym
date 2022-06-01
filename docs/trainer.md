@@ -2,13 +2,13 @@
 
 Just a naive agent of the mahjong. Some ideas come from [Suphx](https://arxiv.org/abs/2003.13590).
 
+And considering that in the game of Majsoul, Ichihime is our good companion (for sure), so we named our agent Ichihime.
+
 ## Run
 
 You should prepare the environment first.
 
-`cd trainer`
-
-`pip install -r requirements.txt`
+`cd trainer && pip install -r requirements.txt`
 
 Then you can train the agent.
 
