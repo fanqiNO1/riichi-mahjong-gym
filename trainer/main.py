@@ -41,13 +41,11 @@ def main(args):
                     if episode % args.save_interval == 0:
                         ichihime.save(f"{args.name}_{episode}")
                         print(f"Saved model at episode {episode}")
-                    break
                 except TypeError:
                     done = True
                     if episode % args.save_interval == 0:
                         ichihime.save(f"{args.name}_{episode}")
                         print(f"Saved model at episode {episode}")
-                    break
                 obs, action, action_dist = ichihime.history[-1]["obs"], ichihime.history[-1]["action"], ichihime.history[-1]["action_dist"]
                 next_obs = game.get_observation(args.player_idx)
                 done = False if game.state["end_game"] == False else True
@@ -77,13 +75,13 @@ def main(args):
                     if episode % args.save_interval == 0:
                         ichihime.save(f"{args.name}_{episode}")
                         print(f"Saved model at episode {episode}")
-                    break
+                    game.state["player_idx"] = args.player_idx
                 except TypeError:
                     done = True
                     if episode % args.save_interval == 0:
                         ichihime.save(f"{args.name}_{episode}")
                         print(f"Saved model at episode {episode}")
-                    break
+                    game.state["player_idx"] = args.player_idx
 
 
 if __name__ == '__main__':
