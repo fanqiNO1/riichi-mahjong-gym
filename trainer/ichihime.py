@@ -2,6 +2,8 @@ from env.agent import Agent
 from trainer.models.strategy import Chii, Pon, Reach, Agari, Replace
 from trainer.utils import encode
 
+from copy import deepcopy
+
 class Ichihime(Agent):
     def __init__(self, name, args):
         super().__init__(name)
@@ -48,7 +50,7 @@ class Ichihime(Agent):
                 action_chosen = action_space[0]
         
         self.history.append(
-            {"obs": obs, "action": action_chosen, "action_space": action_space, "action_dist": action_dist})
+            {"obs": deepcopy(obs), "action": action_chosen, "action_space": action_space, "action_dist": action_dist})
         return action_chosen
 
     def update(self):

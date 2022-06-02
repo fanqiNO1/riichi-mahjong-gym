@@ -23,7 +23,7 @@ def main(args):
         episode += 1
         print("Episode:", episode)
         step = 0
-        game = MahjongGame(ruleset=Ruleset("../rules/ruleset.json"))
+        game = MahjongGame(ruleset=Ruleset("../rules/ruleset-without-aka-dora.json"))
         for i in range(4):
             if i == args.player_idx:
                 player = Player(args.name, is_manual=False, agent=greedy_ddpg)
@@ -41,13 +41,13 @@ def main(args):
                     if episode % args.save_interval == 0:
                         greedy_ddpg.save(f"{args.name}_{episode}")
                         print(f"Saved model at episode {episode}")
-                        greedy_ddpg.write_loss()
+                    greedy_ddpg.write_loss()
                 except TypeError:
                     done = True
                     if episode % args.save_interval == 0:
                         greedy_ddpg.save(f"{args.name}_{episode}")
                         print(f"Saved model at episode {episode}")
-                        greedy_ddpg.write_loss()
+                    greedy_ddpg.write_loss()
                 obs, action = greedy_ddpg.history[-1]["obs"], greedy_ddpg.history[-1]["action"]
                 next_obs = game.get_observation(args.player_idx)
                 done = False if game.state["end_game"] == False else True
@@ -61,7 +61,7 @@ def main(args):
                     if episode % args.save_interval == 0:
                         greedy_ddpg.save(f"{args.name}_{episode}")
                         print(f"Saved model at episode {episode}")
-                        greedy_ddpg.write_loss()
+                    greedy_ddpg.write_loss()
                     break
             else:
                 try:
@@ -71,14 +71,14 @@ def main(args):
                     if episode % args.save_interval == 0:
                         greedy_ddpg.save(f"{args.name}_{episode}")
                         print(f"Saved model at episode {episode}")
-                        greedy_ddpg.write_loss()
+                    greedy_ddpg.write_loss()
                     game.state["player_idx"] = args.player_idx
                 except TypeError:
                     done = True
                     if episode % args.save_interval == 0:
                         greedy_ddpg.save(f"{args.name}_{episode}")
                         print(f"Saved model at episode {episode}")
-                        greedy_ddpg.write_loss()
+                    greedy_ddpg.write_loss()
                     game.state["player_idx"] = args.player_idx
 
 

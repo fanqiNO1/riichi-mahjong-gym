@@ -58,8 +58,10 @@ class Greedy_DDPG(Agent):
 
     def update(self):
         c_loss, a_loss = self.replace.update()
-        self.c_loss.append(a_loss)
-        self.a_loss.append(c_loss)
+        if c_loss is not None:
+            self.c_loss.append(c_loss)
+        if a_loss is not None:
+            self.a_loss.append(a_loss)
 
     def save(self, name):
         self.replace.save(name)
@@ -75,7 +77,6 @@ class Greedy_DDPG(Agent):
     def write_loss(self):
         with open("loss.txt", "a") as f:
             for i in range(len(self.a_loss)):
-                if self.a_loss[i] is not None:
-                    f.write(f"a_loss: {self.a_loss[i]}, c_loss: {self.c_loss[i]}\n")
+                f.write(f"a_loss: {self.a_loss[i]}, c_loss: {self.c_loss[i]}\n")
         self.a_loss = []
         self.c_loss = []

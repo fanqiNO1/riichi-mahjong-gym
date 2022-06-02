@@ -51,7 +51,7 @@ def encode_done(done):
 
 def get_reward(obs, action, next_obs):
     reward = 0
-    if action.action_type == "ron" or action.action_type == "tsumo":
+    if action.action_type == "ron" or action.action_type == "tsumo" or action.action_type == "reach":
         reward = get_reward_agari(obs, action, next_obs)
     elif action.action_type == "chii" or action.action_type == "pon":
         reward = get_reward_call(obs, action, next_obs)
